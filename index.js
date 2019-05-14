@@ -42,7 +42,15 @@ async function start() {
     const page = await browser.newPage()
     page.setViewport({ width: 1280, height: 800 })
 
-    await page.goto('https://www.instagram.com/')
-    
+    await page.goto('https://www.instagram.com/accounts/login/?source=auth_switcher')
+
+    const navigatiomPromise=page.waitForNavigation()
+
+    await page.waitForSelector('input[name="username"]');
+    await page.type('input[name="username"]',user);
+    await page.type('input[name="password"]',pass);
+    await page.click('button[type="submit"]');
+
+    await navigatiomPromise
 }
 start();
