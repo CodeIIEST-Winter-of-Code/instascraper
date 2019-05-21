@@ -52,5 +52,18 @@ async function start() {
     await page.click('button[type="submit"]');
 
     await navigatiomPromise
+
+    await page.waitFor(3000)
+    await page.waitForSelector('body > div.RnEpo.Yx5HN > div > div > div.mt3GC > button.aOOlW.HoLwm')
+    await page.click('body > div.RnEpo.Yx5HN > div > div > div.mt3GC > button.aOOlW.HoLwm')
+
+    //await page.waitFor(3000)
+    await page.waitForSelector('div img')
+    const h1 = await page.evaluate(() => 
+        Array.from(document.querySelectorAll('div img')).map((partner) => partner.src)
+    );
+    
+    console.log(h1)
+    await navigatiomPromise
 }
 start();
