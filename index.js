@@ -2,6 +2,9 @@ const puppeteer = require('puppeteer')
 const fs=require('fs')
 const https=require('https')
 const keys=require('./keys')
+const readlineSync=require('readline-sync')
+const exec = require('child_process').exec;
+
 
 const download = (url, destination) => new Promise((resolve,reject)=>
 {
@@ -30,14 +33,20 @@ const getCred=async()=>{
     }
     return [user,pass]
 }
+const parselink=async(link)=>{
+    var st=link.split('/').slice(-1)[0]
+    var name=st.split('?').slice(0)[0]
+    return name
+}
 async function start() {
     const cred=await getCred()
     const user=cred[0]
     const pass=cred[1]
-    console.log(user,pass)
+    
+    var uid=readlineSync.question('enter username to scrap: ')
 
 	const browser = await puppeteer.launch({
-         headless: false
+         //headless: false
  	})
     const page = await browser.newPage()
     page.setViewport({ width: 1280, height: 800 })
@@ -54,8 +63,7 @@ async function start() {
     await navigatiomPromise
 
     await page.waitFor(3000)
-    await page.waitForSelector('body > div.RnEpo.Yx5HN > div > div > div.mt3GC > button.aOOlW.HoLwm')
-    await page.click('body > div.RnEpo.Yx5HN > div > div > div.mt3GC > button.aOOlW.HoLwm')
+    await page.goto(`https://www.instagram.com/${uid}`)
 
     //await page.waitFor(3000)
     await page.waitForSelector('div img')
@@ -63,7 +71,19 @@ async function start() {
         Array.from(document.querySelectorAll('div img')).map((partner) => partner.src)
     );
     
-    console.log(h1)
-    await navigatiomPromise
+    browser.close();
+
+    var mkdir = 'mkdir -p ' + uid;
+    var child = exec(mkdir, function(err, stdout, stderr) {
+        if (err) throw err;
+    });
+    
+    for(let link of h1){
+        var fname=await parselink(link)
+        var location=uid+"/"+fname
+        download(link,location).then(
+            console.log(`downloaded ${fname}`)
+        ).catch(error=> console.log(error))
+    }
 }
 start();
